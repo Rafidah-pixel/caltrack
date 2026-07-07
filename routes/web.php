@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileGiziController;
@@ -23,7 +23,7 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -36,18 +36,15 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Profile Laravel
+    | Profile
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -55,14 +52,20 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/profile-gizi', [ProfileGiziController::class, 'index'])
-        ->name('profile-gizi.index');
+    Route::controller(ProfileGiziController::class)->group(function () {
+        Route::get('/profile-gizi', 'index')->name('profile-gizi.index');
+        Route::get('/profile-gizi/create', 'create')->name('profile-gizi.create');
+        Route::post('/profile-gizi', 'store')->name('profile-gizi.store');
+    });
 
-    Route::get('/profile-gizi/create', [ProfileGiziController::class, 'create'])
-        ->name('profile-gizi.create');
+    /*
+    |--------------------------------------------------------------------------
+    | Food Search (Autocomplete)
+    |--------------------------------------------------------------------------
+    */
 
-    Route::post('/profile-gizi', [ProfileGiziController::class, 'store'])
-        ->name('profile-gizi.store');
+    Route::get('/foods/search', [FoodController::class, 'search'])
+        ->name('foods.search');
 
     /*
     |--------------------------------------------------------------------------
@@ -70,30 +73,32 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    // Form tambah makanan
-    Route::get('/food-log', [FoodLogController::class, 'create'])
-        ->name('food-log.create');
+    Route::controller(FoodLogController::class)->group(function () {
 
-    // Simpan makanan
-    Route::post('/food-log', [FoodLogController::class, 'store'])
-        ->name('food-log.store');
+        // Form tambah makanan
+        Route::get('/food-log', 'create')->name('food-log.create');
 
-    // Riwayat makanan
-    Route::get('/food-log/history', [FoodLogController::class, 'index'])
-        ->name('food-log.index');
+        // Simpan makanan
+        Route::post('/food-log', 'store')->name('food-log.store');
 
-    // Edit
-    Route::get('/food-log/{foodLog}/edit', [FoodLogController::class, 'edit'])
-        ->name('food-log.edit');
+        // Riwayat makanan
+        Route::get('/food-log/history', 'index')->name('food-log.index');
 
-    // Update
-    Route::put('/food-log/{foodLog}', [FoodLogController::class, 'update'])
-        ->name('food-log.update');
+        // Edit makanan
+        Route::get('/food-log/{foodLog}/edit', 'edit')->name('food-log.edit');
 
-    // Hapus
-    Route::delete('/food-log/{foodLog}', [FoodLogController::class, 'destroy'])
-        ->name('food-log.destroy');
+        // Update makanan
+        Route::put('/food-log/{foodLog}', 'update')->name('food-log.update');
 
+        // Hapus makanan
+        Route::delete('/food-log/{foodLog}', 'destroy')->name('food-log.destroy');
+    });
 });
 
-require __DIR__.'/auth.php';
+/*
+|--------------------------------------------------------------------------
+| Authentication Routes
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__ . '/auth.php';
